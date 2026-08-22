@@ -95,7 +95,17 @@ def create_app() -> FastAPI:
     app.include_router(community_router)
     app.include_router(bootstrap_router)
 
-    # ── Health check ──
+    # ── Root & Health check ──
+    @app.get("/", tags=["Health"])
+    async def root():
+        return {
+            "name": settings.APP_NAME,
+            "status": "online",
+            "version": "0.1.0",
+            "docs": "/docs",
+            "health": "/health",
+        }
+
     @app.get("/health", tags=["Health"])
     async def health_check():
         return {"status": "healthy", "app": settings.APP_NAME}
