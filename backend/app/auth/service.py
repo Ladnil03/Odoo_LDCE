@@ -63,3 +63,16 @@ async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
     """Fetch a user by primary key."""
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()
+
+
+async def update_user_profile(
+    db: AsyncSession, user: User, name: str | None = None, avatar_url: str | None = None
+) -> User:
+    """Update user profile fields."""
+    if name is not None:
+        user.name = name
+    if avatar_url is not None:
+        user.avatar_url = avatar_url
+    await db.flush()
+    return user
+

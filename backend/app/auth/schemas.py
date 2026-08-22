@@ -26,6 +26,12 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class ProfileUpdateRequest(BaseModel):
+    """User profile update request."""
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    avatar_url: str | None = Field(default=None, max_length=500)
+
+
 # ── Response schemas ──
 
 class TokenResponse(BaseModel):
@@ -40,10 +46,17 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     email: str
     name: str
+    avatar_url: str | None = None
     role: str
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class AvatarUploadResponse(BaseModel):
+    """Avatar upload response containing the permanent image URL."""
+    avatar_url: str
+    message: str = "Profile photo updated successfully"
 
 
 class MessageResponse(BaseModel):
