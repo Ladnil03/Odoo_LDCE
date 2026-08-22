@@ -1,0 +1,51 @@
+name,country,region,cost_index,popularity_score,lat,lng
+Tokyo,Japan,East Asia,1.3,95,35.6762,139.6503
+Kyoto,Japan,East Asia,1.1,88,35.0116,135.7681
+Osaka,Japan,East Asia,1.0,82,34.6937,135.5023
+Paris,France,Western Europe,1.4,97,48.8566,2.3522
+London,United Kingdom,Western Europe,1.5,96,51.5074,-0.1278
+Barcelona,Spain,Western Europe,1.0,90,41.3874,2.1686
+Rome,Italy,Western Europe,1.1,93,41.9028,12.4964
+Amsterdam,Netherlands,Western Europe,1.3,85,52.3676,4.9041
+Berlin,Germany,Western Europe,0.9,83,52.5200,13.4050
+Prague,Czech Republic,Central Europe,0.7,80,50.0755,14.4378
+Istanbul,Turkey,Middle East,0.6,87,41.0082,28.9784
+Dubai,UAE,Middle East,1.4,91,25.2048,55.2708
+New York,United States,North America,1.6,98,40.7128,-74.0060
+San Francisco,United States,North America,1.5,84,37.7749,-122.4194
+Los Angeles,United States,North America,1.3,86,34.0522,-118.2437
+Mexico City,Mexico,North America,0.5,78,19.4326,-99.1332
+Cancun,Mexico,North America,0.8,76,21.1619,-86.8515
+Bangkok,Thailand,Southeast Asia,0.4,92,13.7563,100.5018
+Chiang Mai,Thailand,Southeast Asia,0.3,74,18.7883,98.9853
+Bali,Indonesia,Southeast Asia,0.5,89,8.3405,115.0920
+Singapore,Singapore,Southeast Asia,1.3,88,1.3521,103.8198
+Hanoi,Vietnam,Southeast Asia,0.3,75,21.0278,105.8342
+Ho Chi Minh City,Vietnam,Southeast Asia,0.3,73,10.8231,106.6297
+Kuala Lumpur,Malaysia,Southeast Asia,0.5,77,3.1390,101.6869
+Sydney,Australia,Oceania,1.4,89,33.8688,151.2093
+Melbourne,Australia,Oceania,1.3,82,37.8136,144.9631
+Auckland,New Zealand,Oceania,1.2,70,36.8485,174.7633
+Cairo,Egypt,North Africa,0.4,79,30.0444,31.2357
+Marrakech,Morocco,North Africa,0.5,81,31.6295,-7.9811
+Cape Town,South Africa,Sub-Saharan Africa,0.6,83,33.9249,18.4241
+Nairobi,Kenya,Sub-Saharan Africa,0.5,68,1.2921,36.8219
+Buenos Aires,Argentina,South America,0.6,80,34.6037,-58.3816
+Rio de Janeiro,Brazil,South America,0.7,85,22.9068,-43.1729
+Lima,Peru,South America,0.5,72,12.0464,-77.0428
+Cusco,Peru,South America,0.4,77,13.5319,-71.9675
+Lisbon,Portugal,Western Europe,0.8,86,38.7223,-9.1393
+Athens,Greece,Southern Europe,0.8,82,37.9838,23.7275
+Santorini,Greece,Southern Europe,1.2,84,36.3932,25.4615
+Dubrovnik,Croatia,Southern Europe,1.0,78,42.6507,18.0944
+Vienna,Austria,Central Europe,1.1,81,48.2082,16.3738
+Budapest,Hungary,Central Europe,0.6,79,47.4979,19.0402
+Copenhagen,Denmark,Northern Europe,1.4,80,55.6761,12.5683
+Reykjavik,Iceland,Northern Europe,1.6,75,64.1466,-21.9426
+Seoul,South Korea,East Asia,1.0,86,37.5665,126.9780
+Taipei,Taiwan,East Asia,0.7,78,25.0330,121.5654
+Hong Kong,China,East Asia,1.3,87,22.3193,114.1694
+Mumbai,India,South Asia,0.4,76,19.0760,72.8777
+Jaipur,India,South Asia,0.3,73,26.9124,75.7873
+Colombo,Sri Lanka,South Asia,0.3,65,6.9271,79.8612
+Havana,Cuba,Caribbean,0.4,71,23.1136,-82.3666
