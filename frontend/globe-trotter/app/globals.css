@@ -1,67 +1,188 @@
 @import "tailwindcss";
 
-:root {
-  --primary-forest: #2C5E3B;
-  --primary-forest-dark: #1E4329;
-  --primary-forest-light: #3D7D50;
-  --accent-amber: #DD9F2A;
-  --accent-amber-hover: #C58B1E;
-  --bg-cream: #FAF9F6;
-  --card-cream: #FFFFFF;
-  --card-cream-warm: #F5F3ED;
-  --text-charcoal: #222222;
-  --text-muted: #555555;
-  --border-warm: #E6E4DC;
+/* ──────────────────────────────────────────────────────────────────
+   GlobeTrotter Design System — white / ivory editorial light
+   Inspired by editorial product design: lots of breathing room,
+   hairline borders, restrained type, and warm neutral paper tones.
+   ────────────────────────────────────────────────────────────────── */
 
-  --background: var(--bg-cream);
-  --foreground: var(--text-charcoal);
+:root {
+  /* Surfaces */
+  --surface-page: #ffffff;
+  --surface-ivory: #faf7f1;
+  --surface-cream: #f5f1e8;
+  --surface-paper: #fdfbf6;
+  --surface-elevated: #ffffff;
+  --surface-sunken: #f7f3ea;
+
+  /* Ink (text) */
+  --ink-primary: #1a1a1a;
+  --ink-secondary: #4a4a4a;
+  --ink-tertiary: #7a7a7a;
+  --ink-quaternary: #a8a8a8;
+
+  /* Borders */
+  --border-hairline: #ebe7dc;
+  --border-default: #e0dcd0;
+  --border-strong: #c8c2b3;
+
+  /* Accent (only used sparingly) */
+  --accent-ink: #1a1a1a;
+  --accent-pop: #c2410c;       /* single warm orange for CTAs and active states */
+  --accent-pop-soft: #fed7aa;
+  --accent-positive: #15803d;
+  --accent-warning: #b45309;
+
+  /* Type scale */
+  --type-display: 700 56px/1.05 "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --type-h1: 700 40px/1.1 "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --type-h2: 600 28px/1.2 "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --type-h3: 600 20px/1.3 "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --type-body: 400 15px/1.55 "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --type-small: 400 13px/1.4 "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --type-eyebrow: 500 11px/1 "Geist Mono", ui-monospace, "SF Mono", monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-forest: #2C5E3B;
-  --color-forest-dark: #1E4329;
-  --color-forest-light: #3D7D50;
-  --color-amber: #DD9F2A;
-  --color-amber-hover: #C58B1E;
-  --color-cream: #FAF9F6;
-  --color-cream-warm: #F5F3ED;
-  --color-charcoal: #222222;
-  --color-muted: #555555;
-  --color-border-warm: #E6E4DC;
+  --color-page: var(--surface-page);
+  --color-ivory: var(--surface-ivory);
+  --color-cream: var(--surface-cream);
+  --color-paper: var(--surface-paper);
+  --color-sunken: var(--surface-sunken);
+  --color-ink: var(--ink-primary);
+  --color-ink-soft: var(--ink-secondary);
+  --color-ink-muted: var(--ink-tertiary);
+  --color-ink-faint: var(--ink-quaternary);
+  --color-line: var(--border-hairline);
+  --color-line-default: var(--border-default);
+  --color-line-strong: var(--border-strong);
+  --color-pop: var(--accent-pop);
+  --color-pop-soft: var(--accent-pop-soft);
+  --color-positive: var(--accent-positive);
+  --color-warning: var(--accent-warning);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-/* Custom warm scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Base reset */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #F0EFEA;
-  border-radius: 9999px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2C5E3B55;
-  border-radius: 9999px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #2C5E3B99;
-}
-
+html,
 body {
-  background-color: #FAF9F6;
-  color: #222222;
-  overflow-x: hidden;
+  background-color: var(--surface-page);
+  color: var(--ink-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Refined scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Hairline utilities (1px borders that don't double on retina) */
+.hairline {
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+.hairline-t { box-shadow: inset 0 1px 0 var(--border-hairline); }
+.hairline-b { box-shadow: inset 0 -1px 0 var(--border-hairline); }
+.hairline-l { box-shadow: inset 1px 0 0 var(--border-hairline); }
+.hairline-r { box-shadow: inset -1px 0 0 var(--border-hairline); }
+
+/* Display heading utility — feels like editorial print */
+.display {
+  font-family: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+}
+
+/* Eyebrow utility (small caps label above titles) */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+}
+
+/* Paper texture for hero surfaces — purely CSS noise */
+.paper {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(194, 65, 12, 0.025), transparent 40%),
+    radial-gradient(at 100% 100%, rgba(21, 128, 61, 0.02), transparent 40%);
+}
+
+/* Subtle dotted texture for empty/loading areas */
+.dot-grid {
+  background-image: radial-gradient(circle, var(--border-default) 0.6px, transparent 0.6px);
+  background-size: 14px 14px;
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid var(--accent-pop);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-pop-soft);
+  color: var(--ink-primary);
+}
+
+/* Form controls share native look but with editorial polish */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="search"],
+textarea,
+select {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink-primary);
+  background-color: var(--surface-page);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--ink-primary);
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.06);
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: none;
+  filter: invert(0.3);
   cursor: pointer;
 }

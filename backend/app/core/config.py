@@ -26,10 +26,10 @@ class Settings(BaseSettings):
 
     # ── File uploads & Cloudinary ──
     UPLOAD_DIR: str = Field(default="./uploads")
-    CLOUDINARY_CLOUD_NAME: str | None = Field(default=None, description="Cloudinary cloud name")
-    CLOUDINARY_API_KEY: str | None = Field(default=None, description="Cloudinary API key")
-    CLOUDINARY_API_SECRET: str | None = Field(default=None, description="Cloudinary API secret")
-    CLOUDINARY_URL: str | None = Field(default=None, description="Cloudinary connection URL")
+    CLOUDINARY_CLOUD_NAME: str | None = Field(default=None)
+    CLOUDINARY_API_KEY: str | None = Field(default=None)
+    CLOUDINARY_API_SECRET: str | None = Field(default=None)
+    CLOUDINARY_URL: str | None = Field(default=None)
 
     # ── CORS ──
     CORS_ORIGINS: str = Field(
@@ -63,7 +63,11 @@ class Settings(BaseSettings):
         """Parse comma-separated CORS origins into a list."""
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
 
 
 # Singleton – import this everywhere

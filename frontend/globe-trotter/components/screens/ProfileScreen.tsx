@@ -1,331 +1,235 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   Compass,
   User,
   Mail,
-  Phone,
   MapPin,
-  Globe2,
   Calendar,
-  DollarSign,
   Edit2,
   Check,
   Eye,
   Sparkles,
-  Award,
 } from "lucide-react";
-import { motion } from "motion/react";
-import { TiltCard } from "../3d/TiltCard";
-import { MagneticButton } from "../3d/MagneticButton";
+import { Card, Eyebrow, Button, Tag, Avatar, StatPill, Reveal } from "../UiBits";
+import { formatCurrency } from "@/lib/format";
 
 export const ProfileScreen: React.FC = () => {
-  const { user, updateUser, trips, navigateTo, setActiveTripId } = useApp();
+  const { user, updateUser, switchRole, trips, navigateTo, setActiveTripId, showToast } = useApp();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    phone: user.phone,
-    city: user.city,
-    country: user.country,
-    bio: user.bio,
-    language: user.language,
-    currency: user.currency,
-  });
+  const [firstName, setFirstName] = useState(user?.firstName || "Aarav");
+  const [lastName, setLastName] = useState(user?.lastName || "Shah");
+  const [bio, setBio] = useState(
+    user?.bio || "Architect & nomad photographer. Passionate about alpine hikes and cultural routes."
+  );
+  const [city, setCity] = useState(user?.city || "Ahmedabad");
+  const [country, setCountry] = useState(user?.country || "India");
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      if (user.bio) setBio(user.bio);
+      if (user.city) setCity(user.city);
+      if (user.country) setCountry(user.country);
+    }
+  }, [user]);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateUser(formData);
-    setIsEditing(false);
+    try {
+      await updateUser({
+        firstName,
+        lastName,
+        bio,
+        city,
+        country,
+      });
+      setIsEditing(false);
+      showToast("Profile Updated", "Your traveler profile has been saved.", "success");
+    } catch (err: any) {
+      showToast("Update Failed", err?.message, "error");
+    }
   };
 
   const preplannedTrips = trips.filter((t) => t.status === "upcoming" || t.status === "ongoing");
   const previousTrips = trips.filter((t) => t.status === "completed");
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#222222] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--surface-page)] text-[var(--ink-primary)] py-8 px-4 sm:px-6 lg:px-8 paper">
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* Wireframe Tag Banner */}
-        <div className="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 text-xs text-[#2C5E3B]">
+        <div className="flex items-center justify-between py-2 px-4 rounded-xl bg-[var(--surface-paper)] hairline text-xs text-[var(--ink-secondary)]">
           <div className="flex items-center gap-2">
-            <Compass className="w-4 h-4 text-[#2C5E3B]" />
-            <span className="font-bold">Wireframe Screen 7: User Profile Pages</span>
+            <Compass className="w-4 h-4 text-[var(--accent-pop)]" />
+            <span className="font-semibold">Explorer Account & Itinerary History</span>
           </div>
-          <span className="text-[11px] text-[#555555]">
-            User Details Form • Preplanned Trips • Previous Trips
+          <span className="text-[11px] text-[var(--ink-tertiary)] font-mono">
+            ROLE: {(user?.role || "traveler").toUpperCase()}
           </span>
         </div>
 
-        {/* User Profile Header Card */}
-        <TiltCard
-          maxTilt={3}
-          className="p-6 sm:p-8 rounded-3xl bg-white border border-[#E6E4DC] shadow-xl"
-        >
+        {/* Profile Card */}
+        <Card className="p-8 sm:p-10 space-y-6">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            {/* Image of the User */}
-            <div className="relative shrink-0">
-              <div className="w-28 h-28 rounded-3xl p-1 bg-[#2C5E3B] shadow-md shadow-[#2C5E3B]/20">
-                <img
-                  src={user.avatar}
-                  alt={user.firstName}
-                  className="w-full h-full rounded-[22px] object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-[#DD9F2A] text-[#222222] border-2 border-white shadow">
-                <Award className="w-4 h-4" />
-              </div>
-            </div>
+            <Avatar
+              name={`${firstName} ${lastName}`}
+              src={user?.avatar}
+              size={84}
+            />
 
-            {/* User Details with edit button */}
             <div className="flex-1 space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h1 className="text-2xl font-black text-[#222222] flex items-center gap-2">
-                    <span>{user.firstName} {user.lastName}</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#2C5E3B]/10 text-[#2C5E3B] border border-[#2C5E3B]/20 text-[10px] uppercase font-black tracking-wider">
-                      Verified Explorer
-                    </span>
+                  <h1 className="display text-[26px] sm:text-[32px] text-[var(--ink-primary)]">
+                    {firstName} {lastName}
                   </h1>
-                  <p className="text-xs text-[#555555] mt-0.5 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#2C5E3B]" />
-                    <span>{user.city}, {user.country}</span>
-                    <span className="text-[#CCCCCC]">•</span>
-                    <Mail className="w-3.5 h-3.5 text-[#777777]" />
-                    <span>{user.email}</span>
+                  <p className="text-[13px] text-[var(--ink-tertiary)] mt-0.5 flex items-center gap-2 font-mono">
+                    <MapPin className="w-3.5 h-3.5 text-[var(--accent-pop)]" />
+                    <span>{city}, {country}</span>
+                    <span>•</span>
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>{user?.email || "demo@globetrotter.io"}</span>
                   </p>
                 </div>
 
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setIsEditing(!isEditing)}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#FAF9F6] hover:bg-[#F0EFEA] text-[#222222] text-xs font-bold border border-[#E6E4DC] flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Edit2 className="w-3.5 h-3.5 text-[#2C5E3B]" />
-                  <span>{isEditing ? "Cancel Edit" : "Edit Profile"}</span>
-                </button>
+                  <Edit2 className="w-3.5 h-3.5" />
+                  <span>{isEditing ? "Close Edit" : "Edit Profile"}</span>
+                </Button>
               </div>
 
-              <p className="text-xs text-[#444444] leading-relaxed bg-[#FAF9F6] p-3 rounded-2xl border border-[#E6E4DC]">
-                &ldquo;{user.bio}&rdquo;
+              <p className="text-[14px] text-[var(--ink-secondary)] leading-relaxed max-w-prose">
+                &ldquo;{bio}&rdquo;
               </p>
-
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                {user.travelStyle.map((style, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-[#FAF9F6] text-[#2C5E3B] border border-[#E6E4DC]"
-                  >
-                    #{style}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
 
-          {/* Inline Edit Form if enabled */}
+          {/* Stats Bar */}
+          <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[var(--border-hairline)] max-w-xl">
+            <StatPill label="Total Journeys" value={trips.length} />
+            <StatPill label="Active Legs" value={preplannedTrips.length} />
+            <StatPill label="Completed" value={previousTrips.length} />
+          </div>
+
+          {/* Edit Form */}
           {isEditing && (
-            <form onSubmit={handleSave} className="mt-6 pt-6 border-t border-[#E6E4DC] space-y-4">
+            <form onSubmit={handleSave} className="pt-6 border-t border-[var(--border-hairline)] space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#222222] mb-1">First Name</label>
+                  <label className="block text-[12px] font-bold text-[var(--ink-primary)] mb-1 uppercase tracking-wider">
+                    First Name
+                  </label>
                   <input
                     type="text"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-xs text-[#222222]"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[var(--surface-paper)] hairline rounded-lg text-[13px] text-[var(--ink-primary)] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#222222] mb-1">Last Name</label>
+                  <label className="block text-[12px] font-bold text-[var(--ink-primary)] mb-1 uppercase tracking-wider">
+                    Last Name
+                  </label>
                   <input
                     type="text"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-xs text-[#222222]"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full px-3 py-2 bg-[var(--surface-paper)] hairline rounded-lg text-[13px] text-[var(--ink-primary)] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#222222] mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-xs text-[#222222]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#222222] mb-1">Phone</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-xs text-[#222222]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#222222] mb-1">City</label>
+                  <label className="block text-[12px] font-bold text-[var(--ink-primary)] mb-1 uppercase tracking-wider">
+                    City
+                  </label>
                   <input
                     type="text"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-xs text-[#222222]"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full px-3 py-2 bg-[var(--surface-paper)] hairline rounded-lg text-[13px] text-[var(--ink-primary)] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#222222] mb-1">Country</label>
+                  <label className="block text-[12px] font-bold text-[var(--ink-primary)] mb-1 uppercase tracking-wider">
+                    Country
+                  </label>
                   <input
                     type="text"
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-xs text-[#222222]"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    className="w-full px-3 py-2 bg-[var(--surface-paper)] hairline rounded-lg text-[13px] text-[var(--ink-primary)] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#222222] mb-1">Bio</label>
+                <label className="block text-[12px] font-bold text-[var(--ink-primary)] mb-1 uppercase tracking-wider">
+                  Biography & Travel Philosophy
+                </label>
                 <textarea
                   rows={2}
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  className="w-full p-2.5 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-xs text-[#222222]"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="w-full p-3 bg-[var(--surface-paper)] hairline rounded-lg text-[13px] text-[var(--ink-primary)] focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 text-xs font-bold text-[#666666] hover:text-[#222222]"
-                >
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
                   Cancel
-                </button>
-                <MagneticButton variant="primary" size="sm" type="submit">
+                </Button>
+                <Button type="submit" variant="primary" size="md">
                   <Check className="w-3.5 h-3.5" />
-                  <span>Save Changes</span>
-                </MagneticButton>
+                  <span>Save Profile</span>
+                </Button>
               </div>
             </form>
           )}
-        </TiltCard>
+        </Card>
 
-        {/* Preplanned Trips Cards (Matching Wireframe 7) */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-black text-[#222222] flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[#2C5E3B]" />
-                Preplanned Trips
-              </h2>
-              <p className="text-xs text-[#555555]">
-                Scheduled itineraries queued up for execution
-              </p>
-            </div>
-            <span className="text-xs text-[#2C5E3B] font-bold">{preplannedTrips.length} Trips</span>
-          </div>
-
+        {/* Preplanned Journeys */}
+        <div className="space-y-4">
+          <Eyebrow>Active & Upcoming Journeys ({preplannedTrips.length})</Eyebrow>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {preplannedTrips.map((trip) => (
-              <TiltCard
-                key={trip.id}
-                maxTilt={6}
-                className="bg-white border border-[#E6E4DC] shadow-md flex flex-col justify-between p-4"
-              >
+            {preplannedTrips.map((t) => (
+              <Card key={t.id} className="p-5 flex flex-col justify-between space-y-3">
                 <div>
-                  <div className="relative h-36 rounded-2xl overflow-hidden mb-3">
-                    <img src={trip.coverImage} alt={trip.title} className="w-full h-full object-cover" />
-                    <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-[#2C5E3B] text-[10px] font-black text-white uppercase">
-                      {trip.durationDays} Days
-                    </div>
-                  </div>
-
-                  <h3 className="text-sm font-bold text-[#222222] line-clamp-1">{trip.title}</h3>
-                  <div className="text-xs text-[#2C5E3B] font-bold mt-0.5">{trip.destination}, {trip.country}</div>
-                  <p className="text-[11px] text-[#555555] line-clamp-2 mt-1.5 leading-relaxed">
-                    {trip.description}
-                  </p>
+                  <Tag tone="accent">{t.durationDays} Days</Tag>
+                  <h4 className="text-[16px] font-bold text-[var(--ink-primary)] mt-2">{t.title}</h4>
+                  <p className="text-[12px] text-[var(--ink-tertiary)]">{t.destination}</p>
                 </div>
 
-                <div className="pt-3 mt-3 border-t border-[#E6E4DC] flex items-center justify-between">
-                  <div className="text-xs font-black text-[#2C5E3B]">${trip.estimatedBudget}</div>
-                  <button
+                <div className="pt-3 border-t border-[var(--border-hairline)] flex items-center justify-between">
+                  <span className="font-mono text-[13px] font-bold text-[var(--ink-primary)]">
+                    {formatCurrency(t.estimatedBudget)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => {
-                      setActiveTripId(trip.id);
-                      navigateTo("itinerary-view", trip.id);
+                      setActiveTripId(t.id);
+                      navigateTo("itinerary-view", t.id);
                     }}
-                    className="px-3 py-1 rounded-xl bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] text-[#2C5E3B] hover:text-white text-xs font-bold border border-[#2C5E3B]/20 flex items-center gap-1 transition-all cursor-pointer"
                   >
-                    <Eye className="w-3 h-3" />
-                    <span>View (Screen 9)</span>
-                  </button>
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Inspect</span>
+                  </Button>
                 </div>
-              </TiltCard>
+              </Card>
             ))}
           </div>
-        </section>
-
-        {/* Previous Trips Cards (Matching Wireframe 7) */}
-        <section className="space-y-4 pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-black text-[#222222] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#DD9F2A]" />
-                Previous Trips
-              </h2>
-              <p className="text-xs text-[#555555]">
-                Completed past adventures and travel archive
-              </p>
-            </div>
-            <span className="text-xs text-[#666666] font-bold">{previousTrips.length} Trips</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {previousTrips.map((trip) => (
-              <TiltCard
-                key={trip.id}
-                maxTilt={6}
-                className="bg-white border border-[#E6E4DC] shadow-md flex flex-col justify-between p-4"
-              >
-                <div>
-                  <div className="relative h-36 rounded-2xl overflow-hidden mb-3">
-                    <img src={trip.coverImage} alt={trip.title} className="w-full h-full object-cover" />
-                    <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-[#FAF9F6] border border-[#E6E4DC] text-[10px] font-bold text-[#666666] uppercase">
-                      Completed
-                    </div>
-                  </div>
-
-                  <h3 className="text-sm font-bold text-[#222222] line-clamp-1">{trip.title}</h3>
-                  <div className="text-xs text-[#2C5E3B] font-bold mt-0.5">{trip.destination}, {trip.country}</div>
-                  <p className="text-[11px] text-[#555555] line-clamp-2 mt-1.5 leading-relaxed">
-                    {trip.description}
-                  </p>
-                </div>
-
-                <div className="pt-3 mt-3 border-t border-[#E6E4DC] flex items-center justify-between">
-                  <div className="text-xs font-black text-[#555555]">Spent: ${trip.actualExpense}</div>
-                  <button
-                    onClick={() => {
-                      setActiveTripId(trip.id);
-                      navigateTo("itinerary-view", trip.id);
-                    }}
-                    className="px-3 py-1 rounded-xl bg-[#FAF9F6] hover:bg-[#F0EFEA] text-[#222222] text-xs font-bold border border-[#E6E4DC] flex items-center gap-1 transition-all cursor-pointer"
-                  >
-                    <Eye className="w-3 h-3" />
-                    <span>View (Screen 9)</span>
-                  </button>
-                </div>
-              </TiltCard>
-            ))}
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );

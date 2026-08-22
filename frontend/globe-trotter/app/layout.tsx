@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GlobeTrotter - Empowering Personalized Travel Planning",
-  description: "End-to-end multi-city travel planning, physical activity timelines, and community itineraries.",
+  title: "GlobeTrotter — A quieter way to plan a trip",
+  description:
+    "Multi-city itineraries, real-time budget tracking, and a community of travellers — for people who plan trips they actually take.",
 };
 
 export default function RootLayout({
@@ -25,9 +26,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#FAF9F6] text-[#222222] antialiased">
+      <body className="min-h-full flex flex-col bg-[var(--surface-page)] text-[var(--ink-primary)]">
         {children}
       </body>
     </html>

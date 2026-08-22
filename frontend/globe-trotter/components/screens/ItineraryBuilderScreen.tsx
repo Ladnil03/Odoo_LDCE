@@ -1,356 +1,435 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   Compass,
-  Layers,
-  Plus,
-  Trash2,
+  MapPin,
   Calendar,
   DollarSign,
-  Plane,
-  Building,
-  Sparkles,
-  Utensils,
+  Plus,
+  Trash2,
   Eye,
+  Clock,
+  Sparkles,
+  Layers,
+  ChevronRight,
+  Activity as ActivityIcon,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import { TiltCard } from "../3d/TiltCard";
-import { MagneticButton } from "../3d/MagneticButton";
-import { ItinerarySection } from "@/lib/types";
+import { Card, Eyebrow, Button, Tag, StatPill, EmptyState, Reveal } from "../UiBits";
+import { formatCurrency, formatDate } from "@/lib/format";
 
 export const ItineraryBuilderScreen: React.FC = () => {
   const {
     activeTrip,
     trips,
     setActiveTripId,
-    addSectionToTrip,
-    deleteSectionFromTrip,
+    itinerary,
+    itineraryLoading,
+    itineraryTripName,
+    itineraryTotal,
+    refreshItinerary,
+    addStop,
+    removeStop,
+    cities,
+    assignActivity,
+    removeActivity,
+    budget,
+    refreshBudget,
     navigateTo,
+    showToast,
   } = useApp();
 
   const currentTrip = activeTrip || trips[0];
 
-  const [isAddingSection, setIsAddingSection] = useState(false);
-  const [sectionTitle, setSectionTitle] = useState("");
-  const [sectionType, setSectionType] = useState<"travel" | "stay" | "activity" | "dining" | "custom">("activity");
-  const [sectionDescription, setSectionDescription] = useState("");
-  const [startDate, setStartDate] = useState(currentTrip?.startDate || "2024-01-10");
-  const [endDate, setEndDate] = useState(currentTrip?.endDate || "2024-01-13");
-  const [budget, setBudget] = useState(400);
+  const [activeTab, setActiveTab] = useState<"stops" | "timeline" | "budget">("stops");
+  const [selectedCityId, setSelectedCityId] = useState("");
+  const [isAddingStop, setIsAddingStop] = useState(false);
 
-  const getSectionIcon = (type: string) => {
-    switch (type) {
-      case "travel":
-        return Plane;
-      case "stay":
-        return Building;
-      case "dining":
-        return Utensils;
-      default:
-        return Sparkles;
+  useEffect(() => {
+    if (currentTrip?.id) {
+      refreshItinerary(currentTrip.id);
+      refreshBudget(currentTrip.id);
+    }
+  }, [currentTrip?.id, refreshItinerary, refreshBudget]);
+
+  const handleAddStop = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentTrip || !selectedCityId) return;
+    try {
+      await addStop(currentTrip.id, selectedCityId);
+      setIsAddingStop(false);
+      setSelectedCityId("");
+      showToast("Stop Added", "City leg added to your expedition.", "success");
+    } catch (err: any) {
+      showToast("Failed to add stop", err?.message, "error");
     }
   };
 
-  const handleCreateSection = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentTrip) return;
-
-    const newSec: ItinerarySection = {
-      id: `sec-${Date.now()}`,
-      title: sectionTitle || "New Travel Block",
-      type: sectionType,
-      description: sectionDescription || "Planned experiences and bookings for this time segment.",
-      startDate,
-      endDate,
-      budget: Number(budget),
-      actualCost: 0,
-      destinationCity: currentTrip.destination,
-    };
-
-    addSectionToTrip(currentTrip.id, newSec);
-    setIsAddingSection(false);
-    setSectionTitle("");
-    setSectionDescription("");
-  };
-
-  const totalCalculatedBudget = currentTrip?.sections.reduce((acc, s) => acc + s.budget, 0) || 0;
+  if (!currentTrip) {
+    return (
+      <div className="min-h-screen bg-[var(--surface-page)] text-[var(--ink-primary)] p-8 flex items-center justify-center paper">
+        <EmptyState
+          icon={<Compass className="w-8 h-8" />}
+          title="No Trip Selected"
+          description="Create a trip first or pick one from your portfolio."
+          action={
+            <Button variant="primary" size="md" onClick={() => navigateTo("create-trip")}>
+              + Create Trip
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#222222] py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Wireframe Tag Banner */}
-        <div className="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 text-xs text-[#2C5E3B]">
+    <div className="min-h-screen bg-[var(--surface-page)] text-[var(--ink-primary)] py-8 px-4 sm:px-6 lg:px-8 paper">
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Header Ribbon */}
+        <div className="flex items-center justify-between py-2 px-4 rounded-xl bg-[var(--surface-paper)] hairline text-xs text-[var(--ink-secondary)]">
           <div className="flex items-center gap-2">
-            <Compass className="w-4 h-4 text-[#2C5E3B]" />
-            <span className="font-bold">Wireframe Screen 5: Build Itinerary Screen</span>
+            <Compass className="w-4 h-4 text-[var(--accent-pop)]" />
+            <span className="font-semibold">Itinerary Architecture Studio</span>
           </div>
-          <span className="text-[11px] text-[#555555]">
-            Modular Section Cards • Date Ranges • Segment Budgets
+          <span className="text-[11px] text-[var(--ink-tertiary)] font-mono">
+            EXPEDITION: {currentTrip.title.toUpperCase()}
           </span>
         </div>
 
-        {/* Trip Switcher Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-3xl bg-white border border-[#E6E4DC] shadow-md">
-          <div>
-            <div className="text-[11px] uppercase tracking-wider text-[#2C5E3B] font-black">
-              Active Trip Blueprint
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <select
-                value={currentTrip?.id}
-                onChange={(e) => setActiveTripId(e.target.value)}
-                className="bg-[#FAF9F6] text-[#222222] font-black text-base rounded-xl px-3 py-1.5 border border-[#E6E4DC] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B] cursor-pointer"
-              >
-                {trips.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title} ({t.destination})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-xs text-[#555555] font-semibold">Aggregated Budget</div>
-              <div className="text-xl font-black text-[#2C5E3B]">
-                ${totalCalculatedBudget}
+        {/* Trip Switcher & Summary Card */}
+        <Card className="p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <Eyebrow className="mb-1">Active Journey</Eyebrow>
+              <div className="flex items-center gap-3">
+                <select
+                  value={currentTrip.id}
+                  onChange={(e) => setActiveTripId(e.target.value)}
+                  className="bg-[var(--surface-paper)] text-[var(--ink-primary)] font-bold text-[16px] rounded-lg px-3 py-1.5 hairline cursor-pointer focus:outline-none"
+                >
+                  {trips.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.title} ({t.destination})
+                    </option>
+                  ))}
+                </select>
+                <Tag tone="accent">{currentTrip.durationDays} Days</Tag>
               </div>
             </div>
 
-            <MagneticButton
-              variant="amber"
-              size="sm"
-              onClick={() => {
-                if (currentTrip) navigateTo("itinerary-view", currentTrip.id);
-              }}
-            >
-              <Eye className="w-4 h-4" />
-              <span>Itinerary View (Screen 9)</span>
-            </MagneticButton>
-          </div>
-        </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right font-mono">
+                <div className="text-[11px] text-[var(--ink-tertiary)]">Calculated Total</div>
+                <div className="text-[20px] font-bold text-[var(--ink-primary)]">
+                  {formatCurrency(budget?.totalCost || itineraryTotal || currentTrip.estimatedBudget || 0)}
+                </div>
+              </div>
 
-        {/* Stacked Section Cards (Matching Wireframe 5 layout) */}
-        <div className="space-y-4">
-          <AnimatePresence>
-            {currentTrip?.sections.map((section, index) => {
-              const Icon = getSectionIcon(section.type);
-              return (
-                <motion.div
-                  key={section.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <TiltCard
-                    maxTilt={3}
-                    className="p-6 rounded-3xl bg-white border border-[#E6E4DC] shadow-md hover:border-[#2C5E3B] transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-[#2C5E3B]/10 text-[#2C5E3B] border border-[#2C5E3B]/20 flex items-center justify-center font-bold">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-black uppercase tracking-wider text-[#2C5E3B]">
-                              Section {index + 1}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FAF9F6] text-[#555555] border border-[#E6E4DC] capitalize">
-                              {section.type}
-                            </span>
-                          </div>
-                          <h3 className="text-base font-bold text-[#222222] mt-0.5">
-                            {section.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => deleteSectionFromTrip(currentTrip.id, section.id)}
-                        className="p-2 rounded-xl text-[#888888] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                        title="Delete Section"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Section description */}
-                    <p className="text-xs text-[#444444] leading-relaxed bg-[#FAF9F6] p-3.5 rounded-2xl border border-[#E6E4DC] mb-4">
-                      {section.description ||
-                        "All the necessary information about this section. This can be anything like travel section, hotel, or any other activity."}
-                    </p>
-
-                    {/* Bottom Metadata: Date Range & Budget (Matching Wireframe 5) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#E6E4DC]">
-                      <div className="flex items-center gap-2 text-xs text-[#444444] bg-[#FAF9F6] px-3 py-2 rounded-xl border border-[#E6E4DC]">
-                        <Calendar className="w-4 h-4 text-[#2C5E3B] shrink-0" />
-                        <span className="font-medium">
-                          Date Range:{" "}
-                          <strong className="text-[#222222]">
-                            {section.startDate} to {section.endDate}
-                          </strong>
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs text-[#444444] bg-[#FAF9F6] px-3 py-2 rounded-xl border border-[#E6E4DC]">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="w-4 h-4 text-[#2C5E3B] shrink-0" />
-                          <span>Budget of this section:</span>
-                        </div>
-                        <span className="font-black text-[#2C5E3B] text-sm">
-                          ${section.budget}
-                        </span>
-                      </div>
-                    </div>
-                  </TiltCard>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-
-          {/* Add Another Section Button (Matching Wireframe 5) */}
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            onClick={() => setIsAddingSection(true)}
-            className="w-full py-4 rounded-3xl border-2 border-dashed border-[#2C5E3B]/40 hover:border-[#2C5E3B] bg-white hover:bg-[#FAF9F6] text-[#2C5E3B] font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
-          >
-            <Plus className="w-5 h-5" />
-            <span>+ Add another Section</span>
-          </motion.button>
-        </div>
-
-        {/* Modal to Add Section */}
-        <AnimatePresence>
-          {isAddingSection && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                className="w-full max-w-lg p-6 rounded-3xl bg-white border border-[#E6E4DC] shadow-2xl text-[#222222] space-y-4"
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => navigateTo("itinerary-view", currentTrip.id)}
               >
-                <div className="flex items-center justify-between pb-3 border-b border-[#E6E4DC]">
-                  <h3 className="text-lg font-black text-[#222222] flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-[#2C5E3B]" />
-                    Add Itinerary Section
-                  </h3>
+                <Eye className="w-4 h-4" />
+                <span>Read-Only View</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-hairline)]">
+            <button
+              onClick={() => setActiveTab("stops")}
+              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+                activeTab === "stops"
+                  ? "bg-[var(--ink-primary)] text-white"
+                  : "text-[var(--ink-secondary)] hover:bg-[var(--surface-sunken)]"
+              }`}
+            >
+              City Stops ({itinerary.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("timeline")}
+              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+                activeTab === "timeline"
+                  ? "bg-[var(--ink-primary)] text-white"
+                  : "text-[var(--ink-secondary)] hover:bg-[var(--surface-sunken)]"
+              }`}
+            >
+              Day-by-Day Timeline
+            </button>
+            <button
+              onClick={() => setActiveTab("budget")}
+              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+                activeTab === "budget"
+                  ? "bg-[var(--ink-primary)] text-white"
+                  : "text-[var(--ink-secondary)] hover:bg-[var(--surface-sunken)]"
+              }`}
+            >
+              Budget Snapshot
+            </button>
+          </div>
+        </Card>
+
+        {/* TAB 1: City Stops */}
+        {activeTab === "stops" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Eyebrow className="mb-0.5">Route Stops</Eyebrow>
+                <h3 className="text-[20px] font-bold text-[var(--ink-primary)]">Cities in this Expedition</h3>
+              </div>
+
+              <Button variant="primary" size="sm" onClick={() => setIsAddingStop(true)}>
+                <Plus className="w-4 h-4" />
+                <span>Add Stopover</span>
+              </Button>
+            </div>
+
+            {/* Add Stop Form */}
+            {isAddingStop && (
+              <Card className="p-5 border-[var(--ink-primary)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[14px] font-bold text-[var(--ink-primary)]">Select Stopover City</h4>
                   <button
-                    onClick={() => setIsAddingSection(false)}
-                    className="text-xs text-[#666666] hover:text-[#222222]"
+                    onClick={() => setIsAddingStop(false)}
+                    className="text-[12px] text-[var(--ink-tertiary)] hover:text-[var(--ink-primary)]"
                   >
-                    Close
+                    Cancel
                   </button>
                 </div>
 
-                <form onSubmit={handleCreateSection} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#222222] mb-1">
-                      Section Title
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={sectionTitle}
-                      onChange={(e) => setSectionTitle(e.target.value)}
-                      placeholder="e.g. Kyoto High Speed Train & Ryokan"
-                      className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-sm text-[#222222] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]"
-                    />
-                  </div>
+                <form onSubmit={handleAddStop} className="flex gap-3">
+                  <select
+                    required
+                    value={selectedCityId}
+                    onChange={(e) => setSelectedCityId(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-[var(--surface-paper)] hairline rounded-lg text-[13px] text-[var(--ink-primary)] cursor-pointer focus:outline-none"
+                  >
+                    <option value="">Select city from catalog...</option>
+                    {cities.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}, {c.country} ({c.region})
+                      </option>
+                    ))}
+                  </select>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-[#222222] mb-1">
-                        Section Category
-                      </label>
-                      <select
-                        value={sectionType}
-                        onChange={(e) => setSectionType(e.target.value as any)}
-                        className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-sm text-[#222222] font-semibold focus:outline-none focus:ring-2 focus:ring-[#2C5E3B] cursor-pointer"
-                      >
-                        <option value="travel">Travel & Transit</option>
-                        <option value="stay">Hotel & Lodging</option>
-                        <option value="activity">Guided Activity</option>
-                        <option value="dining">Culinary / Dining</option>
-                        <option value="custom">Custom Milestone</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[#222222] mb-1">
-                        Allocated Budget ($)
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        value={budget}
-                        onChange={(e) => setBudget(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-sm text-[#222222] font-semibold focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-[#222222] mb-1">
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-sm text-[#222222] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[#222222] mb-1">
-                        End Date
-                      </label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-sm text-[#222222] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-[#222222] mb-1">
-                      Section Notes & Logistics
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={sectionDescription}
-                      onChange={(e) => setSectionDescription(e.target.value)}
-                      placeholder="Enter booking reference numbers, transit details, contact numbers..."
-                      className="w-full p-2.5 bg-[#FAF9F6] border border-[#E6E4DC] rounded-xl text-sm text-[#222222] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]"
-                    />
-                  </div>
-
-                  <div className="pt-2 flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddingSection(false)}
-                      className="px-4 py-2 text-xs font-bold text-[#666666] hover:text-[#222222]"
-                    >
-                      Cancel
-                    </button>
-                    <MagneticButton variant="amber" size="md" type="submit">
-                      <span>Add Section</span>
-                    </MagneticButton>
-                  </div>
+                  <Button type="submit" variant="primary" size="md">
+                    Confirm Stop
+                  </Button>
                 </form>
-              </motion.div>
+              </Card>
+            )}
+
+            {itinerary.length === 0 ? (
+              <Card className="p-8 text-center">
+                <MapPin className="w-8 h-8 text-[var(--ink-tertiary)] mx-auto mb-2" />
+                <h4 className="text-[15px] font-bold text-[var(--ink-primary)]">No stops added yet</h4>
+                <p className="text-[13px] text-[var(--ink-tertiary)] mt-1">
+                  Add the first destination or layover city to generate day schedules.
+                </p>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {itinerary.map((stop, idx) => (
+                  <Card
+                    key={stop.stopId}
+                    className="p-5 flex items-center justify-between hover:border-[var(--ink-primary)] transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 rounded-full bg-[var(--surface-sunken)] hairline flex items-center justify-center font-mono text-[12px] font-bold text-[var(--ink-secondary)]">
+                        {idx + 1}
+                      </div>
+
+                      <div>
+                        <div className="text-[16px] font-bold text-[var(--ink-primary)]">
+                          {stop.cityName}
+                        </div>
+                        <div className="text-[12px] text-[var(--ink-tertiary)]">
+                          {stop.cityCountry || "Destination Leg"} • {stop.days.length} Days allocated
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <span className="font-mono text-[13px] font-bold text-[var(--ink-primary)]">
+                        {formatCurrency(stop.stopTotal || 0)}
+                      </span>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeStop(currentTrip.id, stop.stopId)}
+                        className="text-rose-600 hover:bg-rose-50"
+                        title="Remove Stop"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 2: Day-by-Day Timeline */}
+        {activeTab === "timeline" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Eyebrow className="mb-0.5">Chronology</Eyebrow>
+                <h3 className="text-[20px] font-bold text-[var(--ink-primary)]">Day-wise Itinerary Grid</h3>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigateTo("search")}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[var(--accent-pop)]" />
+                <span>Browse Activity Catalog</span>
+              </Button>
             </div>
-          )}
-        </AnimatePresence>
+
+            {itinerary.length === 0 ? (
+              <Card className="p-8 text-center">
+                <Clock className="w-8 h-8 text-[var(--ink-tertiary)] mx-auto mb-2" />
+                <h4 className="text-[15px] font-bold text-[var(--ink-primary)]">Timeline not populated</h4>
+                <p className="text-[13px] text-[var(--ink-tertiary)] mt-1">
+                  Add stops in the &quot;City Stops&quot; tab to build the day-wise itinerary timeline.
+                </p>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {itinerary.map((stop) => (
+                  <div key={stop.stopId} className="space-y-3">
+                    <div className="flex items-center gap-2 pb-1 border-b border-[var(--border-hairline)]">
+                      <MapPin className="w-4 h-4 text-[var(--accent-pop)]" />
+                      <h4 className="text-[16px] font-bold text-[var(--ink-primary)]">
+                        {stop.cityName} ({stop.cityCountry})
+                      </h4>
+                    </div>
+
+                    <div className="space-y-3">
+                      {stop.days.map((day, dayIdx) => (
+                        <Card key={dayIdx} className="p-4 space-y-3">
+                          <div className="flex items-center justify-between text-[12px]">
+                            <span className="font-bold text-[var(--ink-primary)] font-mono">
+                              Day {dayIdx + 1} {day.dayDate ? `— ${formatDate(day.dayDate)}` : ""}
+                            </span>
+                            <span className="font-mono text-[var(--ink-tertiary)]">
+                              Day Total: {formatCurrency(day.dayTotal || 0)}
+                            </span>
+                          </div>
+
+                          {day.activities.length === 0 ? (
+                            <div className="p-3 rounded-lg bg-[var(--surface-paper)] text-center text-[11px] text-[var(--ink-tertiary)]">
+                              No activities scheduled for this day yet. Add via Catalog or Search.
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {day.activities.map((act) => (
+                                <div
+                                  key={act.id}
+                                  className="p-2.5 rounded-lg bg-[var(--surface-paper)] hairline flex items-center justify-between text-[12px]"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="w-3 h-3 text-[var(--ink-tertiary)]" />
+                                    <span className="font-mono text-[11px] text-[var(--ink-tertiary)]">
+                                      {act.scheduledTime || "Anytime"}
+                                    </span>
+                                    <span className="font-semibold text-[var(--ink-primary)]">
+                                      {act.title}
+                                    </span>
+                                    <Tag>{act.category || "activity"}</Tag>
+                                  </div>
+
+                                  <div className="flex items-center gap-3">
+                                    <span className="font-mono font-bold text-[var(--ink-primary)]">
+                                      {formatCurrency(act.cost || 0)}
+                                    </span>
+                                    <button
+                                      onClick={() => removeActivity(currentTrip.id, act.id)}
+                                      className="text-[var(--ink-tertiary)] hover:text-rose-600"
+                                      title="Remove from day"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: Budget Snapshot */}
+        {activeTab === "budget" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Eyebrow className="mb-0.5">Financial Audit</Eyebrow>
+                <h3 className="text-[20px] font-bold text-[var(--ink-primary)]">Trip Expense Breakdown</h3>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Card className="p-4">
+                <StatPill label="Total Cost" value={formatCurrency(budget?.totalCost || 0)} />
+              </Card>
+              <Card className="p-4">
+                <StatPill label="Daily Budget" value={formatCurrency(budget?.dailyBudget || 0)} />
+              </Card>
+              <Card className="p-4">
+                <StatPill label="Activity Share" value={formatCurrency(budget?.byCategory.activity || 0)} />
+              </Card>
+              <Card className="p-4">
+                <StatPill label="Food & Dining" value={formatCurrency(budget?.byCategory.food || 0)} />
+              </Card>
+            </div>
+
+            {budget?.byCategory && (
+              <Card className="p-6 space-y-4">
+                <h4 className="text-[15px] font-bold text-[var(--ink-primary)]">Category Allocation</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                  <div className="p-3 rounded-xl bg-[var(--surface-paper)] hairline">
+                    <span className="eyebrow block mb-1">Transport</span>
+                    <span className="font-mono text-[16px] font-bold text-[var(--ink-primary)]">
+                      {formatCurrency(budget.byCategory.transport)}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--surface-paper)] hairline">
+                    <span className="eyebrow block mb-1">Stay / Hotels</span>
+                    <span className="font-mono text-[16px] font-bold text-[var(--ink-primary)]">
+                      {formatCurrency(budget.byCategory.stay)}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--surface-paper)] hairline">
+                    <span className="eyebrow block mb-1">Activities</span>
+                    <span className="font-mono text-[16px] font-bold text-[var(--ink-primary)]">
+                      {formatCurrency(budget.byCategory.activity)}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--surface-paper)] hairline">
+                    <span className="eyebrow block mb-1">Food & Meals</span>
+                    <span className="font-mono text-[16px] font-bold text-[var(--ink-primary)]">
+                      {formatCurrency(budget.byCategory.food)}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
