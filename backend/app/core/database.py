@@ -14,7 +14,13 @@ from app.core.config import settings
 # SQLite doesn't support pool_size/max_overflow, so conditionally set kwargs
 _engine_kwargs: dict = {"echo": settings.DEBUG}
 if "sqlite" not in settings.async_database_url:
-    _engine_kwargs.update(pool_pre_ping=True, pool_size=5, max_overflow=10)
+    _engine_kwargs.update(
+        pool_pre_ping=True,
+        pool_size=2,
+        max_overflow=3,
+        pool_recycle=300,
+        pool_timeout=30,
+    )
 
 engine = create_async_engine(settings.async_database_url, **_engine_kwargs)
 
