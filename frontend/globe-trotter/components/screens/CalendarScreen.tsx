@@ -9,7 +9,7 @@ import {
   Eye,
   MapPin,
 } from "lucide-react";
-import { Card, Eyebrow, Button, Tag, Reveal } from "../UiBits";
+import { Card, Eyebrow, Button, Tag } from "../UiBits";
 import { formatDate } from "@/lib/format";
 
 export const CalendarScreen: React.FC = () => {

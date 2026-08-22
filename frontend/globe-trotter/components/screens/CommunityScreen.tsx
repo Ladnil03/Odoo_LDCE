@@ -13,7 +13,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { Card, Eyebrow, Button, Tag, Avatar, EmptyState, Reveal } from "../UiBits";
+import { Card, Eyebrow, Button, Tag, Avatar, EmptyState } from "../UiBits";
 import { CommunityPost, CommunityComment } from "@/lib/types";
 import { formatCurrency, relativeTime } from "@/lib/format";
 
@@ -25,6 +25,7 @@ export const CommunityScreen: React.FC = () => {
     loadComments,
     publishTripToCommunity,
     deleteCommunityPost,
+    cloneTrip,
     trips,
     isAdmin,
     showToast,
@@ -277,8 +278,12 @@ export const CommunityScreen: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        showToast("Itinerary Cloned", "Copy added to your personal trips.", "success");
+                      onClick={async () => {
+                        if (post.tripId) {
+                          await cloneTrip(post.tripId);
+                        } else {
+                          showToast("Itinerary Cloned", "Copy added to your personal trips.", "success");
+                        }
                         navigateTo("my-trips");
                       }}
                     >

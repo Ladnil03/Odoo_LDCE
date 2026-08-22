@@ -171,7 +171,7 @@ export const ItineraryViewScreen: React.FC = () => {
                 </span>
               </div>
 
-              {!activeDayObj || activeDayObj.day.activities.length === 0 ? (
+              {!activeDayObj || !activeDayObj.day?.activities || activeDayObj.day.activities.length === 0 ? (
                 <div className="p-8 text-center text-[13px] text-[var(--ink-tertiary)]">
                   No scheduled activities on this date yet. Open the builder to assign activities.
                 </div>

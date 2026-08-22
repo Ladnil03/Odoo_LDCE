@@ -10,7 +10,7 @@ import {
   Check,
   Sparkles,
 } from "lucide-react";
-import { Card, Eyebrow, Button, Tag, EmptyState, Reveal } from "../UiBits";
+import { Card, Eyebrow, Button, Tag, EmptyState } from "../UiBits";
 import { catalogApi } from "@/lib/api";
 import { mapActivity, formatCurrency } from "@/lib/format";
 import { ActivityItem } from "@/lib/types";

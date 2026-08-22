@@ -27,6 +27,7 @@ export const HomeScreen: React.FC = () => {
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortByOption, setSortByOption] = useState("popular");
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const regions = [
@@ -37,15 +38,22 @@ export const HomeScreen: React.FC = () => {
     { id: "africa", name: "Africa" },
   ];
 
-  const filteredCities = cities.filter((c) => {
-    const matchesSearch =
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.country.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRegion =
-      activeTab === "all" ||
-      (c.region && c.region.toLowerCase() === activeTab.toLowerCase());
-    return matchesSearch && matchesRegion;
-  });
+  const filteredCities = cities
+    .filter((c) => {
+      const matchesSearch =
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.country.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesRegion =
+        activeTab === "all" ||
+        (c.region && c.region.toLowerCase() === activeTab.toLowerCase());
+      return matchesSearch && matchesRegion;
+    })
+    .sort((a, b) => {
+      if (sortByOption === "name") {
+        return a.name.localeCompare(b.name);
+      }
+      return (b.popularityScore || 0) - (a.popularityScore || 0);
+    });
 
   const recentTrips = trips.slice(0, 3);
   const featuredCommunity = communityPosts.slice(0, 2);
@@ -137,6 +145,15 @@ export const HomeScreen: React.FC = () => {
               <option value="asia">Asia</option>
               <option value="americas">Americas</option>
               <option value="africa">Africa</option>
+            </select>
+
+            <select
+              value={sortByOption}
+              onChange={(e) => setSortByOption(e.target.value)}
+              className="px-3 py-2 bg-[var(--surface-paper)] hairline text-[12px] font-medium rounded-lg text-[var(--ink-primary)] cursor-pointer"
+            >
+              <option value="popular">Most Popular</option>
+              <option value="name">Alphabetical</option>
             </select>
           </div>
         </Card>

@@ -1,20 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   Compass,
   MapPin,
-  Calendar,
-  DollarSign,
-  Sparkles,
   Plus,
-  Check,
   ArrowRight,
-  Image as ImageIcon,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { Card, Eyebrow, Button, SectionHeading, Tag, Reveal } from "../UiBits";
+import { Card, Eyebrow, Button, Reveal } from "../UiBits";
 
 export const CreateTripScreen: React.FC = () => {
   const { navigateTo, createTrip, cities, showToast, setActiveTripId } = useApp();
@@ -31,6 +26,17 @@ export const CreateTripScreen: React.FC = () => {
     "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&auto=format&fit=crop&q=80"
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (cities.length > 0) {
+      if (!selectedCity || selectedCity === "Interlaken") {
+        setSelectedCity(cities[0].name);
+      }
+      if (cities[0].image && (!coverPhoto || coverPhoto.includes("unsplash"))) {
+        setCoverPhoto(cities[0].image);
+      }
+    }
+  }, [cities]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
