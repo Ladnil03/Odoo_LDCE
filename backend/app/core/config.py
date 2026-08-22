@@ -45,7 +45,16 @@ class Settings(BaseSettings):
     @property
     def async_database_url(self) -> str:
         """Ensure postgres connection string uses asyncpg driver."""
-        url = self.DATABASE_URL
+        raw_url = (self.DATABASE_URL or "").strip()
+        if (raw_url.startswith('"') and raw_url.endswith('"')) or (
+            raw_url.startswith("'") and raw_url.endswith("'")
+        ):
+            raw_url = raw_url[1:-1].strip()
+
+        if not raw_url:
+            return "sqlite+aiosqlite:///app.db"
+
+        url = raw_url
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
         elif url.startswith("postgres://"):
@@ -57,6 +66,8 @@ class Settings(BaseSettings):
             url = url.replace("channel_binding=require&", "")
             url = url.replace("?channel_binding=require", "")
             url = url.replace("channel_binding=require", "")
+            if url.endswith("?") or url.endswith("&"):
+                url = url[:-1]
         return url
 
     @property
