@@ -22,6 +22,22 @@ async def lifespan(app: FastAPI):
     """Application lifespan — startup and shutdown hooks."""
     # Ensure upload directory exists
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+
+    # Ensure all tables exist in Neon / DB
+    try:
+        from app.core.database import engine, Base
+        import app.auth.models  # noqa: F401
+        import app.catalog.models  # noqa: F401
+        import app.trips.models  # noqa: F401
+        import app.stops.models  # noqa: F401
+        import app.itinerary.models  # noqa: F401
+        import app.community.models  # noqa: F401
+
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"[Lifespan] Error ensuring database tables: {e}")
+
     yield
     # Shutdown cleanup (if needed)
 
@@ -63,6 +79,8 @@ def create_app() -> FastAPI:
     from app.itinerary.router import router as itinerary_router
     from app.budget.router import router as budget_router
     from app.admin.router import router as admin_router
+    from app.community.router import router as community_router
+    from app.bootstrap.router import router as bootstrap_router
 
     app.include_router(auth_router)
     app.include_router(trips_router)
@@ -72,8 +90,20 @@ def create_app() -> FastAPI:
     app.include_router(itinerary_router)
     app.include_router(budget_router)
     app.include_router(admin_router)
+    app.include_router(community_router)
+    app.include_router(bootstrap_router)
 
-    # ── Health check ──
+    # ── Root & Health check ──
+    @app.get("/", tags=["Health"])
+    async def root():
+        return {
+            "name": settings.APP_NAME,
+            "status": "online",
+            "version": "0.1.0",
+            "docs": "/docs",
+            "health": "/health",
+        }
+
     @app.get("/health", tags=["Health"])
     async def health_check():
         return {"status": "healthy", "app": settings.APP_NAME}

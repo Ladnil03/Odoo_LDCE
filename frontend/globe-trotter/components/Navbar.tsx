@@ -1,207 +1,254 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useApp } from "@/context/AppContext";
-import { ScreenType } from "@/lib/types";
+import type { ScreenType } from "@/lib/types";
 import {
   Compass,
   MapPin,
   Calendar,
   Users,
-  PlusCircle,
+  Search,
+  Plus,
   ShieldCheck,
-  User,
   LogOut,
-  Sparkles,
-  ChevronDown,
-  Layers,
+  Menu,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { MagneticButton } from "./3d/MagneticButton";
+import { initials } from "@/lib/format";
+
+const NAV: { label: string; screen: ScreenType; icon: React.ElementType; adminOnly?: boolean }[] = [
+  { label: "Discover", screen: "home", icon: Compass },
+  { label: "My trips", screen: "my-trips", icon: MapPin },
+  { label: "Activities", screen: "search", icon: Search },
+  { label: "Calendar", screen: "calendar", icon: Calendar },
+  { label: "Community", screen: "community", icon: Users },
+  { label: "Admin", screen: "admin", icon: ShieldCheck, adminOnly: true },
+];
 
 export const Navbar: React.FC = () => {
-  const { currentScreen, navigateTo, user, trips } = useApp();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-
-  const navItems: { label: string; screen: ScreenType; icon: React.ElementType }[] = [
-    { label: "Dashboard", screen: "home", icon: Compass },
-    { label: "My Trips", screen: "my-trips", icon: MapPin },
-    { label: "Activities", screen: "search", icon: Sparkles },
-    { label: "Timeline & Calendar", screen: "calendar", icon: Calendar },
-    { label: "Community", screen: "community", icon: Users },
-    { label: "Admin Analytics", screen: "admin", icon: ShieldCheck },
-  ];
+  const {
+    currentScreen,
+    navigateTo,
+    user,
+    isAuthed,
+    isAdmin,
+    switchRole,
+    logout,
+    bootstrapStatus,
+  } = useApp();
+  const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#FAF9F6]/90 border-b border-[#E6E4DC] text-[#222222] shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Brand: Forest Green */}
-        <div
+    <header className="sticky top-0 z-40 w-full bg-[var(--surface-page)]/85 backdrop-blur-md hairline-b">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-6">
+        {/* Brand */}
+        <button
           onClick={() => navigateTo("home")}
-          className="flex items-center gap-3 cursor-pointer group select-none shrink-0"
+          className="flex items-center gap-2.5 cursor-pointer select-none shrink-0"
         >
-          <div className="relative w-10 h-10 rounded-2xl bg-[#2C5E3B] p-0.5 shadow-md shadow-[#2C5E3B]/20 group-hover:bg-[#1E4329] transition-all duration-300">
-            <div className="w-full h-full bg-[#2C5E3B] rounded-[14px] flex items-center justify-center">
-              <Compass className="w-5 h-5 text-[#DD9F2A] group-hover:rotate-45 transition-transform duration-500" />
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="font-black text-lg tracking-tight text-[#2C5E3B]">
-                GlobeTrotter
-              </span>
-              <span className="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-[#DD9F2A]/20 text-[#222222] border border-[#DD9F2A]/40">
-                PRO
-              </span>
-            </div>
-            <span className="text-[11px] text-[#555555] -mt-0.5 font-medium">Personalized Travel Planning</span>
-          </div>
-        </div>
+          <span className="w-8 h-8 rounded-lg bg-[var(--ink-primary)] flex items-center justify-center">
+            <Compass className="w-4 h-4 text-[var(--surface-page)]" />
+          </span>
+          <span className="font-semibold text-[15px] tracking-tight text-[var(--ink-primary)]">
+            GlobeTrotter
+          </span>
+        </button>
 
-        {/* Navigation Links */}
+        {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-1">
-          {navItems.map((item) => {
+          {NAV.map((item) => {
+            if (item.adminOnly && !isAdmin) return null;
             const Icon = item.icon;
             const isActive = currentScreen === item.screen;
             return (
               <button
-                key={item.screen}
+                key={item.label}
                 onClick={() => navigateTo(item.screen)}
-                className={`relative px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
                   isActive
-                    ? "text-[#2C5E3B] bg-[#2C5E3B]/10 border border-[#2C5E3B]/20"
-                    : "text-[#555555] hover:text-[#222222] hover:bg-[#EAE8E0]/60"
+                    ? "bg-[var(--surface-sunken)] text-[var(--ink-primary)]"
+                    : "text-[var(--ink-tertiary)] hover:text-[var(--ink-primary)] hover:bg-[var(--surface-sunken)]/60"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? "text-[#2C5E3B]" : "text-[#777777]"}`} />
-                <span>{item.label}</span>
-                {isActive && (
-                  <motion.div
-                    layoutId="navbar-active-indicator"
-                    className="absolute -bottom-1 left-3 right-3 h-0.5 bg-[#2C5E3B] rounded-full"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
+                <Icon className="w-3.5 h-3.5" strokeWidth={2.2} />
+                {item.label}
               </button>
             );
           })}
         </nav>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-3">
-          {/* Plan Trip CTA with Warm Amber highlight */}
-          <MagneticButton
-            variant="amber"
-            size="sm"
-            onClick={() => navigateTo("create-trip")}
-            className="hidden sm:inline-flex"
-            glow
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>+ Plan a Trip</span>
-          </MagneticButton>
-
-          {/* User Profile Menu */}
-          <div className="relative">
+        {/* Right actions */}
+        <div className="flex items-center gap-2">
+          {/* Interactive RBAC Switcher */}
+          {isAuthed && (
             <button
-              onClick={() => setProfileDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-[#EAE8E0] transition-colors border border-transparent hover:border-[#E6E4DC] cursor-pointer"
+              onClick={() => switchRole(isAdmin ? "traveler" : "admin")}
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold hairline transition-all cursor-pointer ${
+                isAdmin
+                  ? "bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100"
+                  : "bg-[var(--surface-paper)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:border-[var(--ink-primary)]"
+              }`}
+              title={isAdmin ? "Switch to Demo Traveler" : "Elevate to Demo Admin"}
             >
-              <img
-                src={user.avatar}
-                alt={user.firstName}
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-[#2C5E3B]"
-              />
-              <div className="hidden md:flex flex-col text-left">
-                <span className="text-xs font-bold text-[#222222] leading-tight">
-                  {user.firstName} {user.lastName}
-                </span>
-                <span className="text-[10px] text-[#2C5E3B] font-semibold">
-                  {trips.length} Active Trips
-                </span>
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#777777] hidden md:block" />
+              <ShieldCheck className={`w-3.5 h-3.5 ${isAdmin ? "text-amber-700" : "text-[var(--accent-positive)]"}`} />
+              <span>{isAdmin ? "Admin (Officer)" : "Traveler (Aarav)"}</span>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-black/5">Switch</span>
             </button>
+          )}
 
-            {/* Dropdown Menu */}
-            <AnimatePresence>
-              {profileDropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setProfileDropdownOpen(false)}
-                  />
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-[#E6E4DC] shadow-xl p-2 z-50 text-[#222222]"
-                  >
-                    <div className="p-3 border-b border-[#E6E4DC]">
-                      <div className="text-xs font-bold text-[#222222]">
-                        {user.firstName} {user.lastName}
+          {isAuthed ? (
+            <>
+              <button
+                onClick={() => navigateTo("create-trip")}
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[var(--ink-primary)] text-[var(--surface-page)] text-[13px] font-medium hover:bg-[var(--ink-secondary)] transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+                New trip
+              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen((v) => !v)}
+                  className="w-9 h-9 rounded-full overflow-hidden bg-[var(--surface-sunken)] flex items-center justify-center hairline hover:ring-2 hover:ring-[var(--ink-primary)]/10 transition-shadow"
+                >
+                  {user?.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.avatar}
+                      alt={user.firstName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-[11px] font-semibold text-[var(--ink-secondary)]">
+                      {initials(`${user?.firstName ?? ""} ${user?.lastName ?? ""}`) || "G"}
+                    </span>
+                  )}
+                </button>
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.12 }}
+                      className="absolute right-0 top-12 w-56 rounded-xl bg-[var(--surface-elevated)] hairline shadow-xl shadow-[var(--ink-primary)]/5 py-1.5 z-50"
+                    >
+                      <div className="px-4 py-3 hairline-b">
+                        <p className="text-[13px] font-semibold text-[var(--ink-primary)]">
+                          {user?.firstName} {user?.lastName}
+                        </p>
+                        <p className="text-[11px] text-[var(--ink-tertiary)] truncate">
+                          {user?.email}
+                        </p>
                       </div>
-                      <div className="text-[11px] text-[#777777] truncate">{user.email}</div>
-                      <div className="mt-2 flex items-center gap-2 text-[10px] text-[#2C5E3B] bg-[#2C5E3B]/10 px-2 py-1 rounded-lg font-semibold">
-                        <span>{user.city}, {user.country}</span>
-                      </div>
-                    </div>
-
-                    <div className="py-1">
                       <button
                         onClick={() => {
-                          setProfileDropdownOpen(false);
+                          setProfileOpen(false);
                           navigateTo("profile");
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#222222] hover:bg-[#FAF9F6] rounded-xl transition-colors text-left"
+                        className="w-full text-left px-4 py-2 text-[13px] hover:bg-[var(--surface-sunken)]"
                       >
-                        <User className="w-4 h-4 text-[#2C5E3B]" />
-                        <span>Profile & Settings (Screen 7)</span>
+                        Profile
                       </button>
-
                       <button
                         onClick={() => {
-                          setProfileDropdownOpen(false);
-                          navigateTo("itinerary-builder");
+                          setProfileOpen(false);
+                          navigateTo("my-trips");
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#222222] hover:bg-[#FAF9F6] rounded-xl transition-colors text-left"
+                        className="w-full text-left px-4 py-2 text-[13px] hover:bg-[var(--surface-sunken)]"
                       >
-                        <Layers className="w-4 h-4 text-[#DD9F2A]" />
-                        <span>Itinerary Builder (Screen 5)</span>
+                        My trips
                       </button>
-
                       <button
                         onClick={() => {
-                          setProfileDropdownOpen(false);
-                          navigateTo("admin");
+                          setProfileOpen(false);
+                          logout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#222222] hover:bg-[#FAF9F6] rounded-xl transition-colors text-left"
+                        className="w-full text-left px-4 py-2 text-[13px] hover:bg-[var(--surface-sunken)] flex items-center gap-2 text-[var(--accent-warning)]"
                       >
-                        <ShieldCheck className="w-4 h-4 text-[#2C5E3B]" />
-                        <span>Admin Analytics (Screen 12)</span>
+                        <LogOut className="w-3.5 h-3.5" />
+                        Sign out
                       </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigateTo("login")}
+                className="hidden sm:block px-3 py-1.5 text-[13px] font-medium text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => navigateTo("register")}
+                className="px-3.5 py-2 rounded-lg bg-[var(--ink-primary)] text-[var(--surface-page)] text-[13px] font-medium hover:bg-[var(--ink-secondary)] transition-colors"
+              >
+                Create account
+              </button>
+            </>
+          )}
 
-                      <div className="h-px bg-[#E6E4DC] my-1" />
-
-                      <button
-                        onClick={() => {
-                          setProfileDropdownOpen(false);
-                          navigateTo("login");
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Switch User / Auth Screen</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
+          {/* Mobile menu */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="lg:hidden w-9 h-9 rounded-lg hairline flex items-center justify-center"
+          >
+            {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="lg:hidden overflow-hidden hairline-b bg-[var(--surface-page)]"
+          >
+            <div className="px-5 py-4 space-y-1">
+              {NAV.map((item) => {
+                if (item.adminOnly && !isAdmin) return null;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      setOpen(false);
+                      navigateTo(item.screen);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-sunken)]"
+                  >
+                    <Icon className="w-4 h-4" strokeWidth={2.2} />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bootstrap banner */}
+      {bootstrapStatus === "error" && (
+        <div className="hairline-b bg-[var(--surface-sunken)]">
+          <div className="max-w-7xl mx-auto px-5 py-2 text-[12px] text-[var(--ink-tertiary)] flex items-center justify-between gap-3">
+            <span>
+              <span className="font-semibold text-[var(--accent-warning)]">Backend offline.</span>{" "}
+              Start the FastAPI server at <code className="px-1 py-0.5 rounded bg-[var(--surface-cream)]">http://127.0.0.1:8000</code> for live data.
+            </span>
+            <span className="text-[10px] uppercase tracking-widest">Showing static demo</span>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
