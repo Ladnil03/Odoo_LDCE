@@ -5,7 +5,6 @@ import { useApp } from "@/context/AppContext";
 import {
   Compass,
   Search,
-  MapPin,
   Clock,
   Plus,
   Check,

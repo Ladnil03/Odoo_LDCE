@@ -7,11 +7,9 @@ import {
   User,
   Mail,
   MapPin,
-  Calendar,
   Edit2,
   Check,
   Eye,
-  Sparkles,
 } from "lucide-react";
 import { Card, Eyebrow, Button, Tag, Avatar, StatPill, Reveal } from "../UiBits";
 import { formatCurrency } from "@/lib/format";

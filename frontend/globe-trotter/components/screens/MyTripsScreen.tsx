@@ -6,13 +6,11 @@ import {
   Compass,
   Search,
   MapPin,
-  Calendar,
   Plus,
   Eye,
   Edit3,
   Trash2,
   Share2,
-  CheckCircle2,
 } from "lucide-react";
 import { Card, Eyebrow, Button, Tag, EmptyState, Reveal } from "../UiBits";
 import { Trip } from "@/lib/types";

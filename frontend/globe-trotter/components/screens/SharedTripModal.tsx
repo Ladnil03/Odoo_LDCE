@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, ExternalLink, Calendar, MapPin, Wallet, Loader2 } from "lucide-react";
+import { X, ExternalLink, Calendar, MapPin, Wallet } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { tripsApi } from "@/lib/api";
 import { mapItinerary } from "@/lib/format";

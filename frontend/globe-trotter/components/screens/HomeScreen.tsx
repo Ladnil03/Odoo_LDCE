@@ -5,18 +5,11 @@ import { useApp } from "@/context/AppContext";
 import {
   Compass,
   Search,
-  Filter,
-  ArrowUpDown,
-  Layers,
   MapPin,
-  Calendar,
-  DollarSign,
   Plus,
   ArrowRight,
-  Sparkles,
   Globe2,
   ChevronRight,
-  TrendingUp,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { Card, Eyebrow, Button, SectionHeading, Tag, Avatar, StatPill, Reveal } from "../UiBits";
@@ -34,8 +27,6 @@ export const HomeScreen: React.FC = () => {
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("All");
-  const [sortByOption, setSortByOption] = useState("popular");
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const regions = [
@@ -137,24 +128,15 @@ export const HomeScreen: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <select
-              value={selectedRegion}
-              onChange={(e) => setSelectedRegion(e.target.value)}
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
               className="px-3 py-2 bg-[var(--surface-paper)] hairline text-[12px] font-medium rounded-lg text-[var(--ink-primary)] cursor-pointer"
             >
-              <option value="All">All Continents</option>
-              <option value="Europe">Europe</option>
-              <option value="Asia">Asia</option>
-              <option value="Americas">Americas</option>
-              <option value="Africa">Africa</option>
-            </select>
-
-            <select
-              value={sortByOption}
-              onChange={(e) => setSortByOption(e.target.value)}
-              className="px-3 py-2 bg-[var(--surface-paper)] hairline text-[12px] font-medium rounded-lg text-[var(--ink-primary)] cursor-pointer"
-            >
-              <option value="popular">Most Popular</option>
-              <option value="name">Alphabetical</option>
+              <option value="all">All Continents</option>
+              <option value="europe">Europe</option>
+              <option value="asia">Asia</option>
+              <option value="americas">Americas</option>
+              <option value="africa">Africa</option>
             </select>
           </div>
         </Card>

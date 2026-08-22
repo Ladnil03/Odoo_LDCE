@@ -27,8 +27,13 @@ export function mapCity(raw: any): DestinationCity {
     name: raw.name,
     country: raw.country,
     region: raw.region ?? null,
+    image: raw.image ?? raw.photo_url ?? null,
+    tagline: raw.tagline ?? null,
     costIndex: typeof raw.cost_index === "number" ? raw.cost_index : 1.0,
     popularityScore: raw.popularity_score ?? 0,
+    avgDailyCost: raw.avg_daily_cost ?? null,
+    bestSeason: raw.best_season ?? null,
+    activitiesCount: raw.activities_count ?? 0,
     lat: raw.lat ?? 0,
     lng: raw.lng ?? 0,
   };
@@ -51,6 +56,8 @@ export function mapActivity(raw: any): ActivityItem {
     id: raw.id,
     cityId: raw.city_id,
     name: raw.name,
+    city: raw.city ?? raw.city_name ?? null,
+    country: raw.country ?? null,
     category: (raw.category ?? "activity") as ActivityItem["category"],
     cost: Number(raw.cost ?? 0),
     durationMinutes: raw.duration_minutes ?? 0,
@@ -228,7 +235,7 @@ export function mapAdminUser(raw: any): AdminUser {
     name: raw.name,
     role: raw.role,
     joinDate: raw.created_at?.split("T")[0] ?? "",
-    tripsCount: raw.trip_count ?? 0,
+    tripsCount: raw.trip_count ?? raw.trips_count ?? 0,
   };
 }
 
