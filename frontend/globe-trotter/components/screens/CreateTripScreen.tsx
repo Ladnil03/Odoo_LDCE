@@ -11,7 +11,6 @@ import {
   Plus,
   Check,
   ArrowRight,
-  Star,
   Image as ImageIcon,
 } from "lucide-react";
 import { motion } from "motion/react";

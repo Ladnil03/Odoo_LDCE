@@ -5,15 +5,11 @@ import { useApp } from "@/context/AppContext";
 import {
   Compass,
   MapPin,
-  Calendar,
-  DollarSign,
   ArrowDown,
   Share2,
   Clock,
   PieChart,
-  AlertTriangle,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { Card, Eyebrow, Button, Tag, StatPill, EmptyState, Reveal } from "../UiBits";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -175,7 +171,7 @@ export const ItineraryViewScreen: React.FC = () => {
                 </span>
               </div>
 
-              {activeDayObj?.day.activities.length === 0 || !activeDayObj ? (
+              {!activeDayObj || activeDayObj.day.activities.length === 0 ? (
                 <div className="p-8 text-center text-[13px] text-[var(--ink-tertiary)]">
                   No scheduled activities on this date yet. Open the builder to assign activities.
                 </div>

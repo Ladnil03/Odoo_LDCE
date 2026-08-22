@@ -5,16 +5,11 @@ import { useApp } from "@/context/AppContext";
 import {
   Compass,
   MapPin,
-  Calendar,
-  DollarSign,
   Plus,
   Trash2,
   Eye,
   Clock,
   Sparkles,
-  Layers,
-  ChevronRight,
-  Activity as ActivityIcon,
 } from "lucide-react";
 import { Card, Eyebrow, Button, Tag, StatPill, EmptyState, Reveal } from "../UiBits";
 import { formatCurrency, formatDate } from "@/lib/format";

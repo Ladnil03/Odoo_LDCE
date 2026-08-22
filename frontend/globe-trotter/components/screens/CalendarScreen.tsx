@@ -4,10 +4,8 @@ import React, { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   Compass,
-  Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   Eye,
   MapPin,
 } from "lucide-react";

@@ -4,14 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   Compass,
-  Search,
   Users,
-  TrendingUp,
   MapPin,
   Sparkles,
-  DollarSign,
   ShieldCheck,
-  ShieldAlert,
   Trash2,
   Lock,
   Crown,
