@@ -105,3 +105,48 @@ class TestMe:
     async def test_get_me_no_auth(self, client: AsyncClient):
         response = await client.get("/auth/me")
         assert response.status_code == 401  # No bearer token
+
+
+@pytest.mark.asyncio
+class TestAvatarUpload:
+    async def test_upload_avatar_success(self, client: AsyncClient, test_user):
+        # 1x1 dummy PNG byte sequence
+        png_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\rIDATx\x9cc\xf8\xff\xff?\x03\x05\xfe\x02\xfe\x1c\x00\x00\x00\x00IEND\xaeB`\x82"
+        files = {"file": ("avatar.png", png_bytes, "image/png")}
+
+        response = await client.post(
+            "/auth/avatar",
+            files=files,
+            headers=test_user["auth_header"],
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "avatar_url" in data
+        assert len(data["avatar_url"]) > 0
+
+        # Verify avatar persists in /auth/me
+        me_resp = await client.get("/auth/me", headers=test_user["auth_header"])
+        assert me_resp.status_code == 200
+        me_data = me_resp.json()
+        assert me_data["avatar_url"] == data["avatar_url"]
+
+    async def test_upload_avatar_invalid_content_type(self, client: AsyncClient, test_user):
+        files = {"file": ("document.txt", b"plain text data", "text/plain")}
+        response = await client.post(
+            "/auth/avatar",
+            files=files,
+            headers=test_user["auth_header"],
+        )
+        assert response.status_code == 400
+
+    async def test_update_profile(self, client: AsyncClient, test_user):
+        response = await client.patch(
+            "/auth/profile",
+            json={"name": "Updated Name", "avatar_url": "https://example.com/avatar.jpg"},
+            headers=test_user["auth_header"],
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["name"] == "Updated Name"
+        assert data["avatar_url"] == "https://example.com/avatar.jpg"
+

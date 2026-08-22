@@ -24,8 +24,12 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30)
     REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7)
 
-    # ── File uploads ──
+    # ── File uploads & Cloudinary ──
     UPLOAD_DIR: str = Field(default="./uploads")
+    CLOUDINARY_CLOUD_NAME: str | None = Field(default=None, description="Cloudinary cloud name")
+    CLOUDINARY_API_KEY: str | None = Field(default=None, description="Cloudinary API key")
+    CLOUDINARY_API_SECRET: str | None = Field(default=None, description="Cloudinary API secret")
+    CLOUDINARY_URL: str | None = Field(default=None, description="Cloudinary connection URL")
 
     # ── CORS ──
     CORS_ORIGINS: str = Field(
