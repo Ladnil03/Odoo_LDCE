@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { X, ExternalLink, Calendar, MapPin, Wallet } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { tripsApi } from "@/lib/api";
-import { mapItinerary } from "@/lib/format";
 import { Button, Eyebrow, Skeleton } from "@/components/UiBits";
 
 export const SharedTripModal: React.FC = () => {

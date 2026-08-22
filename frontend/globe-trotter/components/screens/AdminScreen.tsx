@@ -3,8 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 import {
-  Compass,
-  Users,
   MapPin,
   Sparkles,
   ShieldCheck,
@@ -13,8 +11,7 @@ import {
   Crown,
   RefreshCw,
 } from "lucide-react";
-import { Card, Eyebrow, Button, Tag, StatPill, EmptyState, Reveal } from "../UiBits";
-import { formatCurrency } from "@/lib/format";
+import { Card, Eyebrow, Button, Tag, StatPill } from "../UiBits";
 
 export const AdminScreen: React.FC = () => {
   const {

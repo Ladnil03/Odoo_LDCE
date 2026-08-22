@@ -12,13 +12,14 @@ class Settings(BaseSettings):
 
     # ── Database ──
     DATABASE_URL: str = Field(
-        ...,
+        default="sqlite+aiosqlite:///app.db",
         description="Neon DB async connection string (postgresql+asyncpg://...)",
     )
 
     # ── JWT ──
     SECRET_KEY: str = Field(
-        ..., description="Secret key for signing JWT tokens"
+        default="dev-secret-key-change-in-production-1234567890",
+        description="Secret key for signing JWT tokens",
     )
     ALGORITHM: str = Field(default="HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30)
